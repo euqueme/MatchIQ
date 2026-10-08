@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CleverCupid — Match by IQ & Attractiveness</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>CleverCupid</h1>
+      <p>Find matches that fit both your IQ and attractiveness level.</p>
+    </header>
+
+    <main>
+      <section id="steps">
+        <div class="card">
+          <h2>Step 1 — Take your photo</h2>
+          <p>The app requires you to take a live photo (camera only).</p>
+          <div id="camera">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" hidden></canvas>
+          </div>
+          <div class="controls">
+            <button id="startCamera">Start Camera</button>
+            <button id="capturePhoto" disabled>Capture Photo</button>
+          </div>
+          <div id="photoPreview"></div>
+        </div>
+
+        <div class="card">
+          <h2>Step 2 — IQ Test</h2>
+          <form id="iqForm"></form>
+          <button id="submitIQ">Submit IQ Test</button>
+          <div id="iqResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Step 3 — Attractiveness Test</h2>
+          <p>Attractiveness is calculated from your live photo only (no self-rating, no uploads).</p>
+          <div id="attrForm">Please capture a photo and submit to run the attractiveness assessment.</div>
+          <button id="submitAttr">Submit Attractiveness Test</button>
+          <div id="attrResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Filters</h2>
+          <label>Age range: <span id="ageRangeLabel">18–99</span></label>
+          <input id="ageMin" type="range" min="18" max="80" value="18">
+          <input id="ageMax" type="range" min="19" max="99" value="99">
+          <label>Max distance (km): <span id="distLabel">1000</span></label>
+          <input id="maxDist" type="range" min="1" max="5000" value="1000">
+        </div>
+
+        <div class="card">
+          <h2>Matches</h2>
+          <button id="findMatches">Find Matches</button>
+          <div id="matches"></div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <small>This is a prototype. Attractiveness scoring is simplistic and for demo only.</small>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
