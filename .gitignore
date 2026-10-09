@@ -1,0 +1,30 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+public/build/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Logs
+npm-debug.log
+*.log
+
+# Runtime and env
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Misc
+.cache/
+.parcel-cache/
