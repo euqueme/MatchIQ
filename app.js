@@ -1,12 +1,25 @@
 // Simple prototype logic for CleverCupid
+import { sampleUsers, findMatches } from './services/matching.js';
+import { saveUsers, loadUsers, saveCurrent, loadCurrent } from './services/storage.js';
+import { initAuth } from './ui/auth.js';
+import { initChat } from './ui/chat.js';
+import { renderIQ, iqQuestions } from './services/iq.js';
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const startCamera = document.getElementById('startCamera');
 const capturePhoto = document.getElementById('capturePhoto');
 const photoPreview = document.getElementById('photoPreview');
+// Registration camera elements
+const regVideo = document.getElementById('regVideo');
+const regCanvas = document.getElementById('regCanvas');
+const regStartCam = document.getElementById('regStartCam');
+const regCapture = document.getElementById('regCapture');
+const regPhotos = document.getElementById('regPhotos');
 
 let stream;
 let capturedDataUrl = null;
+let regStream;
+let regPhotosArr = [];
 
 startCamera.addEventListener('click', async () => {
   try {
@@ -27,33 +40,32 @@ capturePhoto.addEventListener('click', () => {
   photoPreview.innerHTML = `<img src="${capturedDataUrl}" alt="photo" />`;
 });
 
-// IQ quiz generation (5 sample questions)
+// Registration camera handlers
+if (regStartCam) regStartCam.addEventListener('click', async () => {
+  try {
+    regStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    regVideo.srcObject = regStream;
+    regCapture.disabled = false;
+  } catch (e) { alert('Cannot access camera: '+e.message); }
+});
+if (regCapture) regCapture.addEventListener('click', ()=>{
+  regCanvas.width = regVideo.videoWidth; regCanvas.height = regVideo.videoHeight;
+  const ctx = regCanvas.getContext('2d'); ctx.drawImage(regVideo,0,0);
+  const d = regCanvas.toDataURL('image/png');
+  if (regPhotosArr.length < 5) { regPhotosArr.push(d); renderRegPhotos(); }
+});
+function renderRegPhotos(){ regPhotos.innerHTML=''; regPhotosArr.forEach((p,i)=>{ const img = document.createElement('img'); img.src=p; img.className='reg-photo'; regPhotos.appendChild(img); }); }
+
+// IQ quiz generation (uses questions from services/iq.js)
 const iqForm = document.getElementById('iqForm');
 const submitIQ = document.getElementById('submitIQ');
 const iqResult = document.getElementById('iqResult');
 
-const iqQuestions = [
-  {q:'Which number completes the sequence: 2,4,8,16,?', a:['24','32','30','28'], c:1},
-  {q:'If ALL BLOBS are BLOBSH, and some BLOBS are SLIM, which is possible?', a:['All BLOBSH are SLIM','Some BLOBS are not BLOBSH','All SLIM are BLOBS','None'], c:1},
-  {q:'Analogies: Bird is to Fly as Fish is to:', a:['Swim','Run','Climb','Jump'], c:0},
-  {q:'What is 15% of 200?', a:['25','30','35','20'], c:1},
-  {q:'Which shape has 6 sides?', a:['Triangle','Square','Hexagon','Circle'], c:2}
-];
+// renderIQ from services will be used to populate the form
+renderIQ('iqForm');
 
-function renderIQ() {
-  iqForm.innerHTML = '';
-  iqQuestions.forEach((qs, idx) => {
-    const div = document.createElement('div');
-    div.innerHTML = `<p>${idx+1}. ${qs.q}</p>`;
-    qs.a.forEach((opt, i) => {
-      const id = `iq_${idx}_${i}`;
-      div.innerHTML += `<label><input type="radio" name="q${idx}" value="${i}" id="${id}"> ${opt}</label><br>`;
-    });
-    iqForm.appendChild(div);
-  });
-}
-
-renderIQ();
+// Render IQ to a given container (used for registration step)
+// (moved to services/iq.js)
 
 submitIQ.addEventListener('click', () => {
   let score = 0;
@@ -101,21 +113,46 @@ submitAttr.addEventListener('click', async () => {
   attrResult.dataset.attr = photoScore;
 });
 
-// Sample users
-const sampleUsers = [];
-for (let i=0;i<30;i++) {
-  sampleUsers.push({
-    id:i,
-    name:`User ${i+1}`,
-    age:18+Math.floor(Math.random()*50),
-    iq:80+Math.floor(Math.random()*60),
-    attr:1+Math.floor(Math.random()*10),
-    dist:Math.floor(Math.random()*2000)
-  });
-}
+// sampleUsers is now provided by services/matching.js
 
 const findMatchesBtn = document.getElementById('findMatches');
 const matchesEl = document.getElementById('matches');
+const swipeView = document.getElementById('swipeView');
+const swipeProfile = document.getElementById('swipeProfile');
+const swipeLeft = document.getElementById('swipeLeft');
+const swipeRight = document.getElementById('swipeRight');
+const backToHome = document.getElementById('backToHome');
+const navSwipe = document.getElementById('navSwipe');
+const navChats = document.getElementById('navChats');
+const navHome = document.getElementById('navHome');
+const chatView = document.getElementById('chatView');
+const matchListEl = document.getElementById('matchList');
+const chatWindow = document.getElementById('chatWindow');
+const toggleForce = document.getElementById('toggleForce');
+// Landing / auth elements
+const landing = document.getElementById('landing');
+const btnLogin = document.getElementById('btnLogin');
+const btnRegister = document.getElementById('btnRegister');
+const login = document.getElementById('login');
+const doLogin = document.getElementById('doLogin');
+const cancelLogin = document.getElementById('cancelLogin');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+const register = document.getElementById('register');
+const regNext1 = document.getElementById('regNext1');
+const regUser = document.getElementById('regUser');
+const regPass = document.getElementById('regPass');
+const regStep1 = document.getElementById('regStep1');
+const regStep2 = document.getElementById('regStep2');
+const regStep3 = document.getElementById('regStep3');
+const regNext2 = document.getElementById('regNext2');
+const regNext3 = document.getElementById('regNext3');
+const regIQForm = document.getElementById('regIQForm');
+const regBio = document.getElementById('regBio');
+const regNext3Btn = document.getElementById('regNext3');
+const regFinish = document.getElementById('regFinish');
+const regBioText = document.getElementById('regBioText');
+const cancelReg = document.getElementById('cancelReg');
 
 function getFilters() {
   const ageMin = Number(document.getElementById('ageMin').value);
@@ -129,11 +166,19 @@ findMatchesBtn.addEventListener('click', () => {
   const attr = Number(attrResult.dataset.attr);
   if (!iq || !attr) { alert('Please complete IQ and attractiveness steps.'); return; }
   const f = getFilters();
-  const matches = sampleUsers.filter(u => {
-    return u.iq >= iq-5 && u.iq <= iq+5 && u.attr >= attr-1 && u.attr <= attr+1 && u.age >= f.ageMin && u.age <= f.ageMax && u.dist <= f.maxDist;
-  });
+  // combine registered users (local) with sample users
+  const local = loadUsers();
+  const pool = sampleUsers.concat(local.map((u, i)=>({ ...u, id:1000+i })));
+  const matches = findMatches(pool, iq, attr, f);
   renderMatches(matches);
+  // prepare swipe queue from matches
+  window.currentSwipeQueue = matches.slice();
 });
+
+// Landing / auth handlers
+// initialize auth UI
+initAuth();
+initChat();
 
 function renderMatches(list) {
   matchesEl.innerHTML = '';
@@ -146,6 +191,84 @@ function renderMatches(list) {
   });
 }
 
+// Navigation handlers
+navSwipe.addEventListener('click', ()=>{ document.querySelector('.container').classList.add('hidden'); swipeView.classList.remove('hidden'); loadNextSwipe(); });
+navHome.addEventListener('click', ()=>{ document.querySelector('.container').classList.remove('hidden'); swipeView.classList.add('hidden'); chatView.classList.add('hidden'); });
+navChats.addEventListener('click', ()=>{ document.querySelector('.container').classList.add('hidden'); chatView.classList.remove('hidden'); swipeView.classList.add('hidden'); renderMatchList(); });
+backToHome.addEventListener('click', ()=>{ navHome.click(); });
+
+function loadNextSwipe(){
+  const q = window.currentSwipeQueue || [];
+  if (!q.length) { swipeProfile.innerHTML = '<p>No more candidates. Go back to Home.</p>'; return; }
+  const u = q[0];
+  // show attractiveness photo if available, otherwise placeholder
+  const imgSrc = (u.photos && u.photos[0]) ? u.photos[0] : `https://via.placeholder.com/400x400.png?text=${encodeURIComponent(u.name)}`;
+  const bioText = u.bio || 'No bio available.';
+  swipeProfile.innerHTML = `<img src="${imgSrc}" alt="${u.name}" /><h3>${u.name}, ${u.age}</h3><p>Distance: ${u.dist} km</p><p>Bio: ${bioText}</p>`;
+}
+
+swipeLeft.addEventListener('click', ()=>{
+  // remove current
+  const q = window.currentSwipeQueue || []; if (!q.length) return; q.shift(); loadNextSwipe();
+});
+
+swipeRight.addEventListener('click', ()=>{
+  const q = window.currentSwipeQueue || []; if (!q.length) return; const u = q.shift();
+  // register like; by default simulate reciprocal right randomly
+  u.likedMe = Math.random() < 0.4;
+  // if test toggle is enabled, force reciprocal likes for this session only
+  if (window.forceReciprocal) u.likedMe = true;
+  if (u.likedMe) {
+    // create a match (use matchesList to avoid collision with DOM id 'matches')
+    window.matchesList = window.matchesList || [];
+    window.matchesList.push(u);
+    alert(`It's a match with ${u.name}! Opening chat...`);
+    // open chats and the chat with this user
+    navChats.click();
+    // ensure match list rendered then open chat
+    setTimeout(()=>{ openChat(u); renderMatchList(); }, 100);
+  }
+  loadNextSwipe();
+});
+
+// Simple in-memory chat history per user id
+window.chatHistory = window.chatHistory || {};
+
+// Test-only toggle: force reciprocal likes for this session. Default: off.
+window.forceReciprocal = false;
+if (toggleForce) {
+  toggleForce.textContent = 'Force reciprocal likes (test only)';
+  toggleForce.addEventListener('click', () => {
+    window.forceReciprocal = !window.forceReciprocal;
+    toggleForce.textContent = window.forceReciprocal ? 'Force reciprocal likes: ON' : 'Force reciprocal likes (test only)';
+  });
+}
+
+// Chat rendering
+function renderMatchList(){
+  matchListEl.innerHTML = '';
+  (window.matchesList||[]).forEach(m => {
+    const b = document.createElement('button'); b.textContent = m.name; b.onclick = ()=>openChat(m); matchListEl.appendChild(b);
+  });
+}
+
+function openChat(u){
+  chatWindow.innerHTML = `<h3>Chat with ${u.name}</h3><div id="messages"></div><div><input id="msgInput"><button id="sendMsg">Send</button></div>`;
+  const msgEl = document.getElementById('messages');
+  // render existing history
+  const hist = window.chatHistory[u.id] || [];
+  hist.forEach(m => { const p = document.createElement('div'); p.textContent = m; msgEl.appendChild(p); });
+  document.getElementById('sendMsg').addEventListener('click', ()=>{
+    const t = document.getElementById('msgInput').value; if(!t) return; const mEl = document.getElementById('messages'); const p = document.createElement('div'); p.textContent = 'You: '+t; mEl.appendChild(p);
+    // persist in-memory
+    window.chatHistory[u.id] = window.chatHistory[u.id] || [];
+    window.chatHistory[u.id].push('You: '+t);
+    document.getElementById('msgInput').value='';
+  });
+}
+
+document.getElementById('backFromChat').addEventListener('click', ()=>{ navHome.click(); });
+
 // UI bindings for sliders
 const ageMin = document.getElementById('ageMin');
 const ageMax = document.getElementById('ageMax');
@@ -156,3 +279,39 @@ const distLabel = document.getElementById('distLabel');
 function updateAgeLabel(){ ageLabel.textContent = `${ageMin.value}–${ageMax.value}` }
 ageMin.addEventListener('input', updateAgeLabel); ageMax.addEventListener('input', updateAgeLabel);
 maxDist.addEventListener('input', ()=>distLabel.textContent = maxDist.value);
+
+// Initialization: if a user is logged in, pre-fill their IQ/attractiveness,
+// initialize a default swipe queue and open the swipe view.
+(async function initApp(){
+  try {
+    const current = loadCurrent();
+    // default swipe pool includes sample users + registered local users
+    const local = loadUsers();
+    const pool = sampleUsers.concat(local.map((u, i)=>({ ...u, id:1000+i })));
+    window.currentSwipeQueue = pool.slice();
+
+    if (current) {
+      // pre-fill IQ for the current user (visible only to them)
+      if (current.iq) {
+        iqResult.textContent = `Your estimated IQ: ${current.iq}`;
+        iqResult.dataset.iq = current.iq;
+      }
+      // compute attractiveness from their saved first photo (if present)
+      if (current.photos && current.photos[0]) {
+        attrResult.textContent = 'Computing attractiveness from your saved photo...';
+        const score = await computePhotoAttractiveness(current.photos[0]);
+        if (score != null) {
+          attrResult.textContent = `Your attractiveness level: ${score} (private)`;
+          attrResult.dataset.attr = score;
+        }
+      }
+      // open swipe view as the default home for logged-in users
+      document.querySelector('.container').classList.add('hidden');
+      swipeView.classList.remove('hidden');
+      chatView.classList.add('hidden');
+      loadNextSwipe();
+    }
+  } catch (e) {
+    console.error('Init error', e);
+  }
+})();

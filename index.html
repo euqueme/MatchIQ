@@ -11,10 +11,49 @@
     <header>
       <h1>CleverCupid</h1>
       <p>Find matches that fit both your IQ and attractiveness level.</p>
+      <nav class="topnav hidden">
+        <button id="navSwipe">Swipe</button>
+        <button id="navChats">Chats</button>
+        <button id="navHome">Home</button>
+      </nav>
     </header>
 
     <main>
-      <section id="steps">
+      <!-- Landing / Auth -->
+      <section id="landing">
+        <div class="card">
+          <h2>Welcome to CleverCupid</h2>
+          <button id="btnLogin">Login</button>
+          <button id="btnRegister">Register</button>
+        </div>
+      </section>
+
+      <!-- Login -->
+      <section id="login" class="hidden">
+        <div class="card">
+          <h2>Login</h2>
+          <label>Username: <input id="loginUser"></label>
+          <label>Password: <input id="loginPass" type="password"></label>
+          <button id="doLogin">Login</button>
+          <button id="cancelLogin">Cancel</button>
+        </div>
+      </section>
+
+      <!-- Simple Register: collect email, name, password then go to steps -->
+      <section id="registerSimple" class="hidden">
+        <div class="card">
+          <h2>Register</h2>
+          <label>Email: <input id="regEmail" type="email"></label>
+          <label>Full name: <input id="regName"></label>
+          <label>Password: <input id="regSimplePass" type="password"></label>
+          <div style="margin-top:8px">
+            <button id="regSimpleFinish">Continue to Tests</button>
+            <button id="cancelReg">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="steps" class="hidden">
         <div class="card">
           <h2>Step 1 — Take your photo</h2>
           <p>The app requires you to take a live photo (camera only).</p>
@@ -53,7 +92,7 @@
           <input id="maxDist" type="range" min="1" max="5000" value="1000">
         </div>
 
-        <div class="card">
+        <div class="card" id="findCard">
           <h2>Matches</h2>
           <button id="findMatches">Find Matches</button>
           <div id="matches"></div>
@@ -65,6 +104,30 @@
     </footer>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Swipe view -->
+  <section id="swipeView" class="hidden">
+    <div class="swipeCard">
+      <div id="swipeProfile"></div>
+      <div class="swipeControls">
+        <button id="swipeLeft">⬅️ Dislike</button>
+        <button id="swipeRight">❤️ Like</button>
+      </div>
+      <div style="margin-top:8px">
+        <button id="toggleForce">Force reciprocal likes (test only)</button>
+      </div>
+      <button id="backToHome">Back</button>
+    </div>
+  </section>
+
+  <!-- Chat view -->
+  <section id="chatView" class="hidden">
+    <div class="chatContainer">
+      <div id="matchList" class="matchList"></div>
+      <div id="chatWindow" class="chatWindow"></div>
+    </div>
+    <button id="backFromChat">Back</button>
+  </section>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

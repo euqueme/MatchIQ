@@ -12,3 +12,15 @@ header h1{margin:0;color:var(--accent)}
 .result{margin-top:8px;color:var(--muted)}
 #matches .item{padding:8px;border-bottom:1px solid #eee}
 footer{margin-top:12px;text-align:center;color:#666}
+
+.topnav{display:flex;gap:8px}
+.hidden{display:none}
+.swipeCard{max-width:420px;margin:24px auto;text-align:center}
+.swipeCard img{max-width:100%;border-radius:8px}
+.swipeControls{display:flex;justify-content:space-around;margin-top:12px}
+.chatContainer{display:flex}
+.matchList{width:200px;border-right:1px solid #eee}
+.chatWindow{flex:1;padding:12px}
+
+.card input, .card textarea, .card select, .card button{display:block;margin:8px 0;padding:8px}
+.reg-photo{max-width:120px;border-radius:6px;margin:4px}
